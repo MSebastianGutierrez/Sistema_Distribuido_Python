@@ -1,13 +1,13 @@
 
 ---
 
-# PFO 3: Sistema Distribuido Cliente-Servidor
+# PFO 3: Sistema distribuido Cliente-Servidor
 
 > **Transformación de una arquitectura monolítica a distribuida utilizando Sockets, Hilos y Colas en Python.**
 
 Este proyecto implementa un sistema distribuido capaz de recibir tareas desde múltiples clientes (Web, Móvil y Consola), balancear la carga, procesarlas asíncronamente mediante un pool de workers y persistir los resultados en almacenamiento local simulando servicios cloud.
 
-## ️ Arquitectura del Sistema
+## ️ Arquitectura del sistema
 
 El sistema sigue un patrón de **Cliente-Servidor** con balanceo de carga integrado. Aunque está diseñado para ejecutarse nativamente en un solo host (para facilitar la colaboración sin Docker), su estructura lógica replica una arquitectura de nube moderna (AWS-style).
 
@@ -83,7 +83,7 @@ flowchart TB
     class SUBNET_APP,SUBNET_DATA subnetPrivate;
 ```
 
-###  Componentes Clave
+###  Componentes claves
 
 1.  **Balanceador de Carga (Load Balancer):**
     *   Implementado en Python usando `socket` y `Flask`.
@@ -175,15 +175,15 @@ pfo3-sistema-distribuido/
 
 ---
 
-##  Notas de Arquitectura (DevOps)
+##  Notas de Arquitectura
 
-*   **Sin Docker:** El proyecto está diseñado para correr nativamente ("bare-metal") para evitar problemas de virtualización entre compañeros.
+*   **Sin Docker:** El proyecto está diseñado para correr nativamente ("bare-metal") para evitar problemas de virtualización.
 *   **Persistencia Local:** En un entorno de producción real, SQLite sería reemplazado por PostgreSQL RDS y la carpeta `/almacenamiento` por AWS S3.
 *   **Escalabilidad:** Para escalar horizontalmente, la `queue.Queue()` debería ser reemplazada por un servicio externo como RabbitMQ o Redis, permitiendo que los Workers corran en diferentes máquinas.
 
 ---
 
-##  Autore
+##  Autor
 
 *  Miguel Sebastián Gutierrez - *Estudiante de Desarrollo de Software*
 
