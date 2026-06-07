@@ -163,4 +163,4 @@ pfo3-sistema-distribuido/
 
 ## Licencia
 
-Este proyecto es parte de la materia **Práctica Final Orientada (PFO)** y está destinado exclusivamente para fines educativos.
+Este proyecto es parte de la materia Programación sobre redes y está destinado exclusivamente para fines educativos.
