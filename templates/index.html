@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFO 3 - Sistema Distribuido</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 20px;
+            background: #f0f2f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #667eea;
+        }
+
+        select,
+        textarea,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .estado-pendiente {
+            color: orange;
+        }
+
+        .estado-completada {
+            color: green;
+        }
+
+        .estado-error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 PFO 3 - Sistema Distribuido</h1>
+
+        <div class="card">
+            <h2>📤 Enviar nueva tarea</h2>
+            <select id="tipo">
+                <option value="hash">Calcular hash SHA-256</option>
+                <option value="contar">Contar caracteres</option>
+                <option value="archivo">Guardar archivo (simulado)</option>
+            </select>
+            <textarea id="contenido" rows="4" placeholder="Ingrese el contenido a procesar..."></textarea>
+            <button onclick="enviarTarea()">Enviar tarea</button>
+            <div id="resultado"></div>
+        </div>
+
+        <div class="card">
+            <h2>📋 Tareas recientes</h2>
+            <table id="tabla-tareas">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Resultado</th>
+                        <th>Creado</th>
+                    </tr>
+                </thead>
+                <tbody id="tareas-body">
+                    {% for tarea in tareas %}
+                    <tr>
+                        <td>{{ tarea.id }}</td>
+                        <td>{{ tarea.tipo }}</td>
+                        <td class="estado-{{ tarea.estado }}">{{ tarea.estado }}</td>
+                        <td>{{ tarea.resultado or tarea.archivo_ruta or '-' }}</td>
+                        <td>{{ tarea.creado_en }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function enviarTarea() {
+            const tipo = document.getElementById('tipo').value;
+            const contenido = document.getElementById('contenido').value;
+
+            if (!contenido) {
+                alert('Ingrese contenido');
+                return;
+            }
+
+            const response = await fetch('/api/tareas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tipo, contenido })
+            });
+
+            const data = await response.json();
+            document.getElementById('resultado').innerHTML = `<p>✅ ${data.mensaje} - ID: ${data.tarea_id}</p>`;
+            document.getElementById('contenido').value = '';
+
+            // Recargar tareas después de 2 segundos
+            setTimeout(() => location.reload(), 2000);
+        }
+    </script>
+</body>
+
+</html>
