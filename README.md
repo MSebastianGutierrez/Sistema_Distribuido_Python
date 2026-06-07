@@ -13,46 +13,74 @@ El sistema sigue un patrón de **Cliente-Servidor** con balanceo de carga integr
 
 ```mermaid
 flowchart TB
-    %% Estilos
-    classDef client fill:#f9f9f9,stroke:#333,stroke-width:1px;
-    classDef lb fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
-    classDef queue fill:#e3f2fd,stroke:#2196f3,stroke-width:2px;
-    classDef worker fill:#e8f5e9,stroke:#4caf50,stroke-width:2px;
-    classDef storage fill:#fce4ec,stroke:#e91e63,stroke-width:2px;
+    %% Estilos Globales
+    classDef vpc fill:#f0f4f8,stroke:#232f3e,stroke-width:2px,color:#232f3e;
+    classDef az fill:#ffffff,stroke:#d1d5db,stroke-width:2px,stroke-dasharray: 5 5,color:#374151;
+    classDef subnetPublic fill:#e6f7ff,stroke:#0073bb,stroke-width:1px,color:#004b87;
+    classDef subnetPrivate fill:#f9f0ff,stroke:#956fd4,stroke-width:1px,color:#5c2d91;
+    classDef component fill:#ffffff,stroke:#ff9900,stroke-width:2px,color:#232f3e;
+    classDef db fill:#ffffff,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef client fill:#ffffff,stroke:#545b64,stroke-width:1px,color:#232f3e;
 
     subgraph CLIENTES["🌐 CAPA DE CLIENTES"]
         direction LR
-        Web["📱 Web / Móvil<br/>(HTTP/JSON)"]:::client
-        Console[" Consola Python<br/>(Socket TCP)"]:::client
+        C1["📱 Cliente Web/Móvil<br/>(HTTP/HTML)"]:::client
+        C2["💻 Cliente Consola<br/>(Socket TCP)"]:::client
     end
 
-    subgraph SERVIDOR["⚙️ SERVIDOR DISTRIBUIDO (Python)"]
+    subgraph VPC["️ SERVIDOR LOCAL (VPC Simulada)"]
+        direction TB
         
-        subgraph ENTRY[" ENTRADA"]
-            LB[" Balanceador de Carga<br/>Flask + Sockets<br/>Puertos: 5000/5001"]:::lb
-        end
-
-        subgraph CORE[" PROCESAMIENTO"]
-            MQ[" Cola de Mensajes<br/>queue.Queue()"]:::queue
-            
-            subgraph WORKERS[" POOL DE WORKERS"]
-                W1["Worker 1"]:::worker
-                W2["Worker 2"]:::worker
-                W3["Worker 3"]:::worker
+        %% Zona de Disponibilidad 1: Entrada y Balanceo
+        subgraph AZ1["Zona de Disponibilidad 1 (Entrada)"]
+            direction TB
+            subgraph SUBNET_PUB["Subred Pública (Interfaz)"]
+                LB[" Balanceador de Carga<br/>Flask + Sockets<br/>Puertos: 5000 / 5001"]:::component
             end
         end
 
-        subgraph DATA[" ALMACENAMIENTO"]
-            DB[(" SQLite<br/>tareas.db")]:::storage
-            FS[(" File System<br/>/almacenamiento/")]:::storage
+        %% Zona de Disponibilidad 2: Procesamiento
+        subgraph AZ2["Zona de Disponibilidad 2 (Procesamiento)"]
+            direction TB
+            subgraph SUBNET_APP["Subred Privada (Lógica)"]
+                MQ[" Cola de Mensajes<br/>queue.Queue()"]:::component
+                
+                subgraph WORKERS["Pool de Workers (Threads)"]
+                    W1[" Worker 1<br/>Hash/Count/File"]:::component
+                    W2[" Worker 2<br/>Hash/Count/File"]:::component
+                    W3[" Worker 3<br/>Hash/Count/File"]:::component
+                end
+            end
+        end
+
+        %% Zona de Disponibilidad 3: Datos
+        subgraph AZ3["Zona de Disponibilidad 3 (Persistencia)"]
+            direction TB
+            subgraph SUBNET_DATA["Subred de Datos"]
+                DB[("🗄️ PostgreSQL/SQLite<br/>tareas.db")]:::db
+                FS[("️ S3 Simulado<br/>Carpeta /almacenamiento/")]:::db
+            end
         end
     end
 
-    Web -->|HTTP :5001| LB
-    Console -->|TCP :5000| LB
-    LB --> MQ
-    MQ --> W1 & W2 & W3
-    W1 & W2 & W3 --> DB & FS
+    %% Conexiones
+    C1 -->|HTTP :5001| LB
+    C2 -->|TCP :5000| LB
+    
+    LB -->|Encolar Tarea| MQ
+    
+    MQ -->|Distribuir| W1
+    MQ -->|Distribuir| W2
+    MQ -->|Distribuir| W3
+    
+    W1 & W2 & W3 -->|Guardar Metadatos| DB
+    W1 & W2 & W3 -->|Guardar Archivos| FS
+
+    %% Aplicar clases a los contenedores
+    class VPC vpc;
+    class AZ1,AZ2,AZ3 az;
+    class SUBNET_PUB subnetPublic;
+    class SUBNET_APP,SUBNET_DATA subnetPrivate;
 ```
 
 ###  Componentes Clave
