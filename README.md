@@ -161,15 +161,12 @@ Sigue el menú para enviar tareas vía Socket TCP directamente al balanceador.
 
 ```text
 pfo3-sistema-distribuido/
-├── server/
-│   ├── servidor.py           # Lógica principal (LB, Workers, DB)
-│   ── templates/
-│       └── index.html        # Interfaz de usuario Web
-├── client/
-│   └── cliente.py            # Cliente de consola TCP
-├── almacenamiento/           # Carpeta generada para archivos guardados
-├── tareas.db                 # Base de datos SQLite generada
-├── requirements.txt
+├── templates/
+│       └── index.html                    # Interfaz de usuario Web
+├── cliente_distribuido.py                # Cliente de consola TCP
+├── almacenamiento/                       # Carpeta generada para archivos guardados
+├── tareas.db                             # Base de datos SQLite generada
+├── servidor_distribuido.py               # Lógica principal (LB, Workers, DB)
 └── README.md
 ```
 
